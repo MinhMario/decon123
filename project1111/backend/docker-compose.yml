@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: task_management_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Minh01052007.}
+      MYSQL_DATABASE: ${DB_NAME:-task_project_management}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app_network
+
+  backend:
+    build: .
+    container_name: task_management_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-Minh01052007.}
+      DB_NAME: ${DB_NAME:-task_project_management}
+      SECRET_KEY: ${SECRET_KEY:-super-secret-key}
+    ports:
+      - "8000:8000"
+    networks:
+      - app_network
+
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge
+
